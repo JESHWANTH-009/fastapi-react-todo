@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FastAPI ToDo App</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 2rem; }
+    h1 { color: #4CAF50; }
+    input, button { padding: 0.5rem; margin-right: 0.5rem; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 0.5rem 0; display: flex; justify-content: space-between; }
+    li span { flex: 1; }
+  </style>
+</head>
+<body>
+  <h1>✅ FastAPI ToDo App</h1>
+
+  <input type="text" id="taskInput" placeholder="Enter a task..." />
+  <button onclick="addTodo()">Add</button>
+
+  <ul id="todoList"></ul>
+
+  <script>
+    const apiUrl = "/todos/";
+
+    async function fetchTodos() {
+      const res = await fetch(apiUrl);
+      const todos = await res.json();
+      const list = document.getElementById("todoList");
+      list.innerHTML = "";
+      todos.forEach(todo => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <span style="text-decoration:${todo.completed ? 'line-through' : 'none'}">${todo.task}</span>
+          <button onclick="toggleComplete(${todo.id}, ${!todo.completed})">${todo.completed ? 'Undo' : 'Complete'}</button>
+          <button onclick="deleteTodo(${todo.id})">Delete</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    async function addTodo() {
+      const task = document.getElementById("taskInput").value;
+      if (!task) return;
+      await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task, completed: false })
+      });
+      document.getElementById("taskInput").value = "";
+      fetchTodos();
+    }
+
+    async function deleteTodo(id) {
+      await fetch(apiUrl + id, { method: "DELETE" });
+      fetchTodos();
+    }
+
+    async function toggleComplete(id, newStatus) {
+      const res = await fetch(apiUrl + id);
+      const todo = await res.json();
+      await fetch(apiUrl + id, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task: todo.task, completed: newStatus })
+      });
+      fetchTodos();
+    }
+
+    fetchTodos(); // initial load
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+todos.db
+
+# React / Node
+fastapi-todo-frontend/node_modules/
+fastapi-todo-frontend/build/
+fastapi-todo-frontend/.env
+
+# Misc
+.DS_Store
+*.log
